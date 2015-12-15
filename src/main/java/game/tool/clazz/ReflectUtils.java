@@ -85,8 +85,7 @@ public class ReflectUtils {
 	private static abstract class Setter {
 		private static Setter getSetter(Class clazz, String propertyName) {
 			try {
-				String methodName = "set"
-						+ StringUtils.capitalize(propertyName);
+				String methodName = "set" + StringUtils.capitalize(propertyName);
 				for (Method method : clazz.getMethods()) {
 					if (method.getName().equals(methodName)) {
 						if (method.getParameterTypes().length == 1) {

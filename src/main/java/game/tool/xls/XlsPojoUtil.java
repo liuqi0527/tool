@@ -272,11 +272,11 @@ public class XlsPojoUtil {
 	 * @param <T>
 	 * @param sourceFile
 	 * @param sheetName
-	 * @param t
+	 * @param clazz
 	 * @param keyLists
 	 * @return
 	 */
-	public static <K,T extends KeySupport<K>> Map<K,T> sheetToGenericMap(String sourceFile,String sheetName,Class<T> t, boolean linked) {
+	public static <K,T extends KeySupport<K>> Map<K,T> sheetToGenericMap(String sourceFile,String sheetName,Class<T> clazz, boolean linked) {
 		Workbook book = null;
 		int curRow = 0;
 		int curCol = 0;
@@ -297,7 +297,7 @@ public class XlsPojoUtil {
 			}
 			for (row = 2; row < rsRows; row++) {
 				curRow = row;
-				T as = t.newInstance();
+				T instance = clazz.newInstance();
 				boolean put = false ;
 				for (column = 0; column < rsColumns; column++) {
 					curCol = column;
@@ -314,13 +314,13 @@ public class XlsPojoUtil {
 						put = true ;
 					}
 					// 对象(属性名) 值 和列名 ------把值封装进对象
-					as = cellToProperty(value, as, curColName);
+					instance = cellToProperty(value, instance, curColName);
 				}
 				if(put){
-					if(map.containsKey(as.getKey())){
-						logger.error("have same key:" + as.getKey() +" in file:" + sourceFile + " sheet:" + sheetName);
+					if(map.containsKey(instance.getKey())){
+						logger.error("have same key:" + instance.getKey() +" in file:" + sourceFile + " sheet:" + sheetName);
 					}
-					map.put(as.getKey(), as);
+					map.put(instance.getKey(), instance);
 				}
 			}
 			return map;

@@ -7,9 +7,10 @@ repositories {
 }
 
 dependencies {
-   compile 'org.slf4j:slf4j-api:1.7.12'
-   compile 'org.slf4j:slf4j-simple:1.7.12'
-   compile 'net.sourceforge.jexcelapi:jxl:2.6.10'
+   compile	'org.slf4j:slf4j-api:1.7.12', 
+   			'org.slf4j:slf4j-simple:1.7.12', 
+   			'net.sourceforge.jexcelapi:jxl:2.6.10',
+   			'com.alibaba:fastjson:1.2.5'
 
    testCompile 'junit:junit:3.8.1'
 }
