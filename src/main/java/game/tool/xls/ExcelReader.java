@@ -12,9 +12,9 @@ import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSON;
 
-import game.tool.xls.field.PropertyField;
-import game.tool.xls.field.reader.FieldReader;
-import game.tool.xls.field.reader.TypeDefFieldReader;
+import game.tool.xls.property.field.PropertyField;
+import game.tool.xls.property.reader.FieldReader;
+import game.tool.xls.property.reader.TypeDefFieldReader;
 import game.tool.xls.template.ArmyTitleTemplate;
 import game.tool.xls.template.KeySupport;
 import jxl.Cell;

@@ -1,4 +1,4 @@
-package game.tool.xls.field.reader;
+package game.tool.xls.property.reader;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,9 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import game.tool.util.Util;
-import game.tool.xls.field.PropertyField;
-import game.tool.xls.field.impl.EmptyPropertyField;
-import game.tool.xls.field.impl.SimpleDefPropertyField;
+import game.tool.xls.property.field.EmptyPropertyField;
+import game.tool.xls.property.field.PropertyField;
+import game.tool.xls.property.field.impl.TypeDefPropertyField;
 import jxl.Cell;
 import jxl.Sheet;
 
@@ -34,7 +34,7 @@ public class TypeDefFieldReader implements FieldReader {
 				Cell typeCell = sheet.getCell(column, 1);
 				
 				PropertyField field = EmptyPropertyField.instance();
-				if(!check(nameCell, typeCell)){
+				if(isEmpty(nameCell) || isEmpty(typeCell)){
 					logger.error("sheet={}, column={}, name or type is not define ", sheet.getName(), column);
 				}else if(simpleTypes.contains(typeCell.getContents())){
 					field = getField(nameCell, typeCell, clazz);
@@ -49,21 +49,14 @@ public class TypeDefFieldReader implements FieldReader {
 	
 	private PropertyField getField(Cell nameCell, Cell typeCell, Class clazz){
 		if(simpleTypes.contains(typeCell.getContents())){
-			return new SimpleDefPropertyField(nameCell.getContents(), typeCell.getContents());
+			return new TypeDefPropertyField(nameCell.getContents(), typeCell.getContents());
 		}
 		
 		return EmptyPropertyField.instance();
 	}
 
-	private boolean check(Cell nameCell, Cell typeCell){
-		if(nameCell == null || Util.isEmpty(nameCell.getContents())){
-			return false; 
-		}
-		if(typeCell == null || Util.isEmpty(typeCell.getContents())){
-			return false;
-		}
-		
-		return true;
+	private boolean isEmpty(Cell cell){
+		return cell == null || Util.isEmpty(cell.getContents());
 	}
 	
 	@Override

@@ -1,11 +1,11 @@
-package game.tool.xls.field.impl;
+package game.tool.xls.property.field.impl;
 
 import java.beans.PropertyDescriptor;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import game.tool.xls.field.AbstractPropertyField;
+import game.tool.xls.property.field.AbstractPropertyField;
 
 /**
  *根据模板类推断类型 <br/>

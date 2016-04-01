@@ -1,10 +1,10 @@
-package game.tool.xls.field.impl;
+package game.tool.xls.property.field.impl;
 
-public class SimpleDefPropertyField extends SimplePropertyField {
+public class TypeDefPropertyField extends SimplePropertyField {
 	private String type;
 	
 	
-	public SimpleDefPropertyField(String fieldName, String type){
+	public TypeDefPropertyField(String fieldName, String type){
 		this.fieldName = fieldName;
 		this.type = type;
 	}

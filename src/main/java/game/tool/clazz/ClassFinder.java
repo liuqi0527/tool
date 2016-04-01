@@ -126,7 +126,7 @@ public class ClassFinder {
 		
 		
 		for(File child : file.listFiles()){
-			if(file.isFile()){
+			if(child.isFile()){
 				fileToClazz(child, pathPrefix, result);
 			}else{
 				result.addAll(findFromDirectory(child.getPath(), pathPrefix));

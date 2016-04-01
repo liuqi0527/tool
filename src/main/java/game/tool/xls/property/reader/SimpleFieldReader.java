@@ -1,4 +1,4 @@
-package game.tool.xls.field.reader;
+package game.tool.xls.property.reader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,9 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import game.tool.util.Util;
-import game.tool.xls.field.PropertyField;
-import game.tool.xls.field.impl.EmptyPropertyField;
-import game.tool.xls.field.impl.SimplePropertyField;
+import game.tool.xls.property.field.EmptyPropertyField;
+import game.tool.xls.property.field.PropertyField;
+import game.tool.xls.property.field.impl.SimplePropertyField;
 import jxl.Cell;
 import jxl.Sheet;
 

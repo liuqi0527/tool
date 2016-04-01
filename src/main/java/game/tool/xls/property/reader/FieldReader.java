@@ -1,8 +1,8 @@
-package game.tool.xls.field.reader;
+package game.tool.xls.property.reader;
 
 import java.util.List;
 
-import game.tool.xls.field.PropertyField;
+import game.tool.xls.property.field.PropertyField;
 import jxl.Sheet;
 
 /**

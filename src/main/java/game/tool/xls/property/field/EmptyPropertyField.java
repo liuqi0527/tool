@@ -1,6 +1,4 @@
-package game.tool.xls.field.impl;
-
-import game.tool.xls.field.AbstractPropertyField;
+package game.tool.xls.property.field;
 
 /**
  *空类型，不处理
