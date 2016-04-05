@@ -1,6 +1,7 @@
 package game.tool.xls.property.field.impl;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -29,13 +30,15 @@ public class SimplePropertyField extends AbstractPropertyField {
 	@Override
 	protected Object parser(String value) {
 		try {
-			PropertyDescriptor prop = new PropertyDescriptor(fieldName, clazz);
-			String type = prop.getPropertyType().getSimpleName();
+//			PropertyDescriptor prop = new PropertyDescriptor(fieldName, clazz);
+//		    String type = prop.getPropertyType().getSimpleName();
+			Field field = clazz.getField(fieldName);
+			String type = field.getType().getSimpleName();
 			if (value.equals("") && !type.equals("String")) {
 				return null;
 			}
 			
-			return resolve(prop.getPropertyType().getSimpleName(), value);
+			return resolve(type, value);
 		} catch (Exception ex) {
 			return null;
 		}
