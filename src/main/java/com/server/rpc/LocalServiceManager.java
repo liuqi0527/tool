@@ -1,9 +1,8 @@
-package com.egls.server.core.rpc;
+package com.server.rpc;
 
-import java.lang.reflect.Constructor;
+import com.server.rpc.spi.RpcService;
+import com.server.tool.clazz.ReflectUtils;
 
-import com.egls.server.core.rpc.spi.RpcService;
-import com.egls.server.utils.reflect.ConstructorUtil;
 
 /**
  * 用于管理本地所提供的服务，本地提供的服务是服务接口的具体实现
@@ -15,8 +14,7 @@ public class LocalServiceManager extends AbstractServiceManager {
 
     @SuppressWarnings("unchecked")
     protected RpcService buildService(Class<? extends RpcService> serviceClass) throws Exception {
-        Constructor<? extends RpcService> constructor = (Constructor<? extends RpcService>) ConstructorUtil.getNoneParamConstructor(serviceClass);
-        RpcService service = constructor.newInstance();
+        RpcService service = ReflectUtils.newObject(serviceClass);
         service.init();
         return service;
     }

@@ -1,12 +1,11 @@
-package com.egls.server.core.rpc;
+package com.server.rpc;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-import com.egls.server.core.ServerProperties;
-import com.egls.server.core.rpc.spi.RemoteServer;
-import com.egls.server.core.rpc.spi.RpcService;
+import com.server.rpc.spi.RemoteServer;
+import com.server.rpc.spi.RpcService;
 
 /**
  * 用于管理某一远程进程提供的服务的本地接口
@@ -43,14 +42,8 @@ public class RemoteServiceManager extends AbstractServiceManager implements Invo
     }
 
     public void tick() {
-        if (remoteServer == null) {
-            return;
-        }
-
-        if (isRemoteValid()) {
+        if (remoteServer != null) {
             remoteServer.processRemoteInvoke();
-        } else if (!ServerProperties.serverType.isCenter()) {
-            //断线重连
         }
     }
 

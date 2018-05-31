@@ -1,7 +1,11 @@
-package com.server.rpc;
+package com.server.rpc.egls;
 
 /**
  * @author LiuQi - [Created on 2018-05-23]
  */
-public class ServerType {
+public enum  ServerType {
+
+    master,
+    slave,
+    center
 }

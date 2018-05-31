@@ -1,6 +1,6 @@
-package com.egls.server.core.rpc.spi;
+package com.server.rpc.spi;
 
-import com.egls.server.core.rpc.Invoke;
+import com.server.rpc.Invoke;
 
 /**
  * 远程服务器在本地一个抽象，

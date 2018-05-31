@@ -1,6 +1,9 @@
 package test.tool;
 
+import org.junit.Test;
+
 public class MyThread extends Thread {
+
 	public void run() {
 		while (true) {
 			if (Thread.interrupted()) {
@@ -16,10 +19,15 @@ public class MyThread extends Thread {
 		}
 	}
 
-	public static void main(String[] args) throws InterruptedException {
-		MyThread t = new MyThread();
-		t.start();
-		Thread.sleep(3000);
-		t.interrupt();
-	}
+    @Test
+    public void test1() {
+        try {
+            MyThread t = new MyThread();
+            t.start();
+            Thread.sleep(3000);
+            t.interrupt();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 }

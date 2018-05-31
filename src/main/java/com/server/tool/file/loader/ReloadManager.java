@@ -1,24 +1,40 @@
-package com.server.tool.file.reload;
+package com.server.tool.file.loader;
 
 import java.io.File;
-import java.util.*;
+import java.util.Objects;
 
 /**
+ * 文件重载管理器
+ * 默认情况下，文件发生变动立刻执行重载
+ * 可以指定实现IReloader接口的其他重载实现
+ *
  * @author LiuQi - [Created on 2018-05-24]
  */
 public class ReloadManager {
 
-    private static Map<FileLoader, File> reloadMap = new HashMap<>();
+    private static IReloader reloader = new ReloadImmediately();
 
-    public static void addFileReloader(FileLoader fileLoader, File file) {
-        reloadMap.put(fileLoader, file);
+    /**
+     * 设置文件变动时，所有执行的操作实现
+     */
+    public static void setReloader(IReloader reloader) {
+        Objects.requireNonNull(reloader);
+        ReloadManager.reloader = reloader;
     }
 
-    public static void reloadAll() {
-        List<FileLoader> loaders = new ArrayList<>(reloadMap.keySet());
-        Collections.sort(loaders);
-        loaders.forEach(loader -> loader.reload(reloadMap.get(loader)));
-        reloadMap.clear();
+    static void addFileLoader(FileLoader fileLoader, File file) {
+        reloader.addFileLoader(fileLoader, file);
+    }
+
+    /**
+     * 文件变动立即重载
+     */
+    private static class ReloadImmediately implements IReloader {
+
+        @Override
+        public void addFileLoader(FileLoader fileLoader, File file) {
+            fileLoader.reload(file);
+        }
     }
 
 }

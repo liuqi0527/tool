@@ -6,9 +6,12 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.util.Iterator;
 
+import org.junit.Test;
+
 public class NioTest {
 
-	public static void main(String[] args){
+	@Test
+    public void test1() {
 		try {
 			ServerSocketChannel channel = ServerSocketChannel.open();
 			channel.configureBlocking(false);

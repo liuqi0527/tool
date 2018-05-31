@@ -1,6 +1,7 @@
-package com.egls.server.core.rpc.egls.service;
+package com.server.rpc.egls.service;
 
-import com.egls.server.core.rpc.spi.RpcService;
+
+import com.server.rpc.spi.RpcService;
 
 /**
  * @author LiuQi - [Created on 2018-05-22]

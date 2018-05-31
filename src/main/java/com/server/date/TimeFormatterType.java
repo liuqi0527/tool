@@ -1,12 +1,11 @@
 package com.server.date;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
  * @author LiuQi - [Created on 2018-05-24]
  */
-public enum LocalDateTimeFormatterType {
+public enum TimeFormatterType {
 
     date("yyyy-MM-dd"),
     time("hh:mm:ss"),
@@ -18,11 +17,11 @@ public enum LocalDateTimeFormatterType {
 
     private DateTimeFormatter formatter;
 
-    LocalDateTimeFormatterType(String pattern) {
+    TimeFormatterType(String pattern) {
         this.formatter = DateTimeFormatter.ofPattern(pattern);
     }
 
-    public String format(LocalDateTime localDateTime) {
-        return localDateTime.format(formatter);
+    public DateTimeFormatter getFormatter() {
+        return formatter;
     }
 }

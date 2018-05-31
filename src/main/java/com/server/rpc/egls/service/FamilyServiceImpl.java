@@ -1,7 +1,8 @@
-package com.egls.server.core.rpc.egls.service;
+package com.server.rpc.egls.service;
 
-import com.egls.server.core.ServerType;
-import com.egls.server.core.rpc.spi.Rpc;
+
+import com.server.rpc.egls.ServerType;
+import com.server.rpc.spi.Rpc;
 
 /**
  * 工会服务实现类

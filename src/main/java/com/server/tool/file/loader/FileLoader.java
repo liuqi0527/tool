@@ -1,7 +1,6 @@
-package com.server.tool.file.reload;
+package com.server.tool.file.loader;
 
 import java.io.File;
-import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.server.tool.file.SimpleFileMonitor;
@@ -29,17 +28,17 @@ public abstract class FileLoader implements SimpleFileMonitor, Comparable<FileLo
 
     @Override
     public void onCreate(File file) {
-        ReloadManager.addFileReloader(this, file);
+        ReloadManager.addFileLoader(this, file);
     }
 
     @Override
     public void onModify(File file) {
-        ReloadManager.addFileReloader(this, file);
+        ReloadManager.addFileLoader(this, file);
     }
 
     @Override
     public void onDelete(File file) {
-        ReloadManager.addFileReloader(this, file);
+        ReloadManager.addFileLoader(this, file);
     }
 
     public void load(File file) {

@@ -1,8 +1,8 @@
-package com.egls.server.core.rpc.spi;
+package com.server.rpc.spi;
 
 import java.lang.annotation.*;
 
-import com.egls.server.core.ServerType;
+import com.server.rpc.egls.ServerType;
 
 /**
  * @author LiuQi - [Created on 2018-05-22]

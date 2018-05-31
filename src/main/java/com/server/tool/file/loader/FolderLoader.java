@@ -1,11 +1,10 @@
-package com.server.tool.file.reload;
+package com.server.tool.file.loader;
 
 import java.io.File;
 import java.util.Optional;
 
+import com.server.tool.file.FileType;
 import com.server.tool.file.SimpleFileMonitor;
-
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * 文件夹加载器，实现了文件夹重载功。
@@ -24,7 +23,7 @@ public abstract class FolderLoader extends FileLoader implements SimpleFileMonit
     }
 
     private void loadFolder(File file) {
-        if (!StringUtils.equals(".svn", file.getName())) {
+        if (!FileType.isSvn(file)) {
             if (file.isDirectory()) {
                 Optional.ofNullable(file.listFiles()).ifPresent(files -> {
                     for (File f : files) {

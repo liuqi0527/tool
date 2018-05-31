@@ -1,4 +1,4 @@
-package com.egls.server.core.rpc.spi;
+package com.server.rpc.spi;
 
 /**
  * 远程RPC服务器接口父类

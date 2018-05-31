@@ -1,4 +1,4 @@
-package com.egls.server.core.rpc;
+package com.server.rpc;
 
 /**
  * @author LiuQi - [Created on 2018-05-22]

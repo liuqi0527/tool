@@ -1,11 +1,11 @@
-package com.egls.server.core.rpc;
+package com.server.rpc;
 
 import java.lang.annotation.Annotation;
 import java.util.*;
 
-import com.egls.server.core.ServerType;
-import com.egls.server.core.rpc.spi.Rpc;
-import com.egls.server.core.rpc.spi.RpcService;
+import com.server.rpc.egls.ServerType;
+import com.server.rpc.spi.Rpc;
+import com.server.rpc.spi.RpcService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.reflections.ReflectionUtils;
@@ -15,19 +15,21 @@ import org.reflections.scanners.TypeAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 
+
 /**
  * 服务管理父类，用于管理一个进程提供的所有服务接口
  *
  * @author LiuQi - [Created on 2018-05-22]
  */
+@SuppressWarnings("unchecked")
 public abstract class AbstractServiceManager {
 
-    protected Map<Class<? extends RpcService>, String> classNameMap = new HashMap<>();
+    private Map<Class<? extends RpcService>, String> classNameMap = new HashMap<>();
 
-    protected Map<String, RpcService> nameServiceMap = new HashMap<>();
+    private Map<String, RpcService> nameServiceMap = new HashMap<>();
 
-    public void init(ServerType serverType) {
-        for (Class<? extends RpcService> serviceClass : getAvailableServiceClass(serverType)) {
+    public void init(ServerType serverType, String packageName) {
+        for (Class<? extends RpcService> serviceClass : getAvailableServiceClass(serverType, packageName)) {
             try {
                 Rpc rpc = searchServiceAnnotation(serviceClass);
                 Class<? extends RpcService> rpcService = searchServiceInterface(serviceClass);
@@ -58,18 +60,19 @@ public abstract class AbstractServiceManager {
         }
     }
 
-    private static List<Class<? extends RpcService>> getAvailableServiceClass(ServerType serverType) {
+    private static List<Class<? extends RpcService>> getAvailableServiceClass(ServerType serverType, String packageName) {
         List<Class<? extends RpcService>> list = new ArrayList<>();
 
         ConfigurationBuilder builder = new ConfigurationBuilder();
         builder.setScanners(new TypeAnnotationsScanner(), new SubTypesScanner());
-        builder.setUrls(ClasspathHelper.forPackage("com.egls.server.core.rpc.egls.service"));//todo
+        builder.setUrls(ClasspathHelper.forPackage(packageName));
+
         Reflections reflections = new Reflections(builder);
         Set<Class<?>> typesAnnotatedWith = reflections.getTypesAnnotatedWith(Rpc.class);
-        for (Class<?> aClass : typesAnnotatedWith) {
-            Rpc rpc = searchServiceAnnotation(aClass);
-            if (searchServiceInterface(aClass) != null && rpc != null && Arrays.stream(rpc.value()).anyMatch(type -> type == serverType)) {
-                list.add((Class<? extends RpcService>) aClass);
+        for (Class<?> clazz : typesAnnotatedWith) {
+            Rpc rpc = searchServiceAnnotation(clazz);
+            if (searchServiceInterface(clazz) != null && rpc != null && Arrays.stream(rpc.value()).anyMatch(type -> type == serverType)) {
+                list.add((Class<? extends RpcService>) clazz);
             }
         }
         return list;

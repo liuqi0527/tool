@@ -8,7 +8,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author LiuQi
@@ -17,17 +20,48 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FileWatcher extends Thread {
 
-    private static final FileWatcher instance = new FileWatcher();
+    private static final Logger logger = LoggerFactory.getLogger(FileWatcher.class);
 
-    private static final AtomicBoolean running = new AtomicBoolean(false);
+    private static final FileWatcher instance = new FileWatcher();
 
     private static final Map<WatchKey, Collection<FileMonitor>> watchKeyMap = new ConcurrentHashMap<>();
 
-    private WatchService service;
+    private volatile WatchService service;
+
+
+    private FileWatcher() {
+        setName(this.getClass().getName());
+        setDaemon(true);
+    }
+
+    public synchronized static void startup() {
+        if (instance.service != null) {
+            logger.error("file watcher service already startup");
+        } else {
+            try {
+                instance.service = FileSystems.getDefault().newWatchService();
+                instance.start();
+            } catch (IOException e) {
+                logger.error("", e);
+            }
+        }
+    }
+
+    public synchronized static void shutdown() {
+        if (instance.service != null) {
+            try {
+                instance.service.close();
+                instance.service = null;
+                watchKeyMap.clear();
+            } catch (IOException e) {
+                logger.error("", e);
+            }
+        }
+    }
 
     @Override
     public void run() {
-        while (running.get()) {
+        while (instance.service != null) {
             try {
                 WatchKey key;
                 while ((key = service.poll(1L, TimeUnit.MILLISECONDS)) != null) {
@@ -41,48 +75,32 @@ public class FileWatcher extends Thread {
 
                 Thread.sleep(1000L);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                logger.error("", e);
             }
         }
     }
 
-    public static void startup() {
-        if (running.get()) {
-            //
-            return;
-        }
-
-        try {
-            running.set(true);
-            instance.service = FileSystems.getDefault().newWatchService();
-            instance.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public static void registerDirectory(File file, SimpleFileMonitor monitor, FileType fileType) {
+        registerDirectory(file, monitor, fileType, FileWatchKind.create, FileWatchKind.delete, FileWatchKind.modify);
     }
 
-    public static void shutdown() {
-        running.set(false);
-        try {
-            instance.service.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public static void registerDirectory(File file, SimpleFileMonitor monitor, FileType fileType, FileWatchKind... kinds) {
+        register(file, new LocalDirMonitor(monitor, fileType, kinds), kinds);
     }
 
-    public static void register(File file, SimpleFileMonitor monitor, FileWatchKind... kinds) {
-        register(file, (eventFile, eventKind) -> {
-            if (eventKind == StandardWatchEventKinds.ENTRY_CREATE) {
-                monitor.onCreate(eventFile);
-            } else if (eventKind == StandardWatchEventKinds.ENTRY_DELETE) {
-                monitor.onDelete(eventFile);
-            } else if (eventKind == StandardWatchEventKinds.ENTRY_MODIFY) {
-                monitor.onModify(eventFile);
-            }
-        }, kinds);
+    public static void registerFile(File file, SimpleFileMonitor monitor) {
+        registerFile(file, monitor, FileWatchKind.create, FileWatchKind.delete, FileWatchKind.modify);
+    }
+
+    public static void registerFile(File file, SimpleFileMonitor monitor, FileWatchKind... kinds) {
+        register(file, new LocalFileMonitor(file, monitor), kinds);
     }
 
     public static void register(File file, FileMonitor monitor, FileWatchKind... kinds) {
+        if (FileType.isSvn(file)) {
+            return;
+        }
+
         WatchEvent.Kind[] kindArray = new WatchEvent.Kind[kinds.length];
         for (int i = 0; i < kinds.length; i++) {
             kindArray[i] = kinds[i].getKind();
@@ -91,8 +109,8 @@ public class FileWatcher extends Thread {
         try {
             Path path = Paths.get(file.isDirectory() ? file.getPath() : file.getParent());
             WatchKey watchKey = path.register(instance.service, kindArray);
-            Collection<FileMonitor> monitors = watchKeyMap.computeIfAbsent(watchKey, key -> new ConcurrentLinkedQueue<>());
-            monitors.add(getMonitor(file, monitor, kinds));
+            Collection<FileMonitor> monitors = watchKeyMap.computeIfAbsent(watchKey, key -> new ConcurrentLinkedQueue<>());//todo 去重
+            monitors.add(monitor);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -107,33 +125,44 @@ public class FileWatcher extends Thread {
         }
     }
 
-    private static FileMonitor getMonitor(File file, FileMonitor monitor, FileWatchKind... kinds) {
-        return file.isDirectory() ? new LocalDirMonitor(monitor, kinds) : new LocalFileMonitor(file, monitor);
+    private static void dispatcher(SimpleFileMonitor monitor, File file, WatchEvent.Kind kind) {
+        if (kind == StandardWatchEventKinds.ENTRY_CREATE) {
+            monitor.onCreate(file);
+        } else if (kind == StandardWatchEventKinds.ENTRY_DELETE) {
+            monitor.onDelete(file);
+        } else if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
+            monitor.onModify(file);
+        }
     }
 
     private static class LocalDirMonitor implements FileMonitor {
-        private FileMonitor monitor;
+        private SimpleFileMonitor monitor;
+        private FileType fileType;
         private FileWatchKind[] kinds;
 
-        private LocalDirMonitor(FileMonitor monitor, FileWatchKind[] kinds) {
+        private LocalDirMonitor(SimpleFileMonitor monitor, FileType fileType, FileWatchKind... kinds) {
             this.monitor = monitor;
+            this.fileType = fileType;
             this.kinds = kinds;
         }
 
         @Override
         public void dispatcher(File file, WatchEvent.Kind kind) {
             if (file.isDirectory() && FileWatchKind.of(kind) == FileWatchKind.create) {
-                FileWatcher.register(file, monitor, kinds);
+                FileWatcher.registerDirectory(file, monitor, fileType, kinds);
             }
-            monitor.dispatcher(file, kind);
+
+            if (!FileType.isSvn(file) || file.isDirectory() || fileType.accept(file)) {
+                FileWatcher.dispatcher(monitor, file, kind);
+            }
         }
     }
 
     private static class LocalFileMonitor implements FileMonitor {
         private String filePath;
-        private FileMonitor monitor;
+        private SimpleFileMonitor monitor;
 
-        private LocalFileMonitor(File file, FileMonitor monitor) {
+        private LocalFileMonitor(File file, SimpleFileMonitor monitor) {
             this.filePath = file.getName();
             this.monitor = monitor;
         }
@@ -141,40 +170,7 @@ public class FileWatcher extends Thread {
         @Override
         public void dispatcher(File file, WatchEvent.Kind kind) {
             if (filePath.equals(file.getName())) {
-                monitor.dispatcher(file, kind);
-            }
-        }
-    }
-
-    public static void main(String[] args) throws Exception {
-        File file = new File("E:/workspace_test/FileTest");
-        FileWatcher.startup();
-
-        SimpleFileMonitor simpleFileMonitor = new SimpleFileMonitor() {
-            @Override
-            public void onCreate(File file) {
-                System.out.println("create : " + (file == null ? "null" : file.getName()));
-            }
-
-            @Override
-            public void onModify(File file) {
-                System.out.println("modify  : " + (file == null ? "null" : file.getName()));
-            }
-
-            @Override
-            public void onDelete(File file) {
-                System.out.println("delete : " + (file == null ? "null" : file.getName()));
-
-            }
-        };
-
-
-        FileWatcher.register(file, simpleFileMonitor, FileWatchKind.create, FileWatchKind.delete, FileWatchKind.modify);
-        while (true) {
-            try {
-                Thread.sleep(1000);
-            } catch (Exception e) {
-                e.printStackTrace();
+                FileWatcher.dispatcher(monitor, file, kind);
             }
         }
     }
